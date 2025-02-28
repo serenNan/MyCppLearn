@@ -1,7 +1,7 @@
 /* 静态变量.cpp */
 #include <iostream>
 using namespace std;
-int i = 1; // i 为全局变量，具有静态生存期。
+static int i = 1; // i 为全局变量，具有静态生存期。
 int main(void) {
   static int a; // 静态局部变量，有全局寿命，局部可见。
   int b = -10;  // b, c为局部变量，具有动态生存期。

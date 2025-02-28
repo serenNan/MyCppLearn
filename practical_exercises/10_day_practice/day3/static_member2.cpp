@@ -6,7 +6,7 @@ public:
   static void f(A a);
 
 private:
-  int x;
+  int x = 10;
 };
 void A::f(A a) {
 
@@ -17,7 +17,7 @@ void A::f(A a) {
 
 int main(int argc, char const *argv[]) {
   A a;
-  a.f(A());
-  
+  a.f(a);
+  a.f(A()); 
   return 0;
 }

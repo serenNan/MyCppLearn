@@ -13,15 +13,19 @@ public:
   static void g();
 
 private:
+  int x = 1;
   static int global;
 };
 int Application::global = 0;
-void Application::f() { global = 5; }
+void Application::f()
+{
+    global = 5;
+    // x = 1; // 静态成员函数只能引用属于该类的静态数据成员或静态成员函数
+}
 void Application::g() { cout << global << endl; }
 
 int main() {
   Application::f();
   Application::g();
-  
   return 0;
 }
