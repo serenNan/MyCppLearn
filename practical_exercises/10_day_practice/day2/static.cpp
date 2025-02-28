@@ -17,6 +17,8 @@ int main(void) {
        << endl; // 33 0 -10 8
   i = i + 10;
   other(); // 75 6 4 15
+  cout << "---MAIN---\n";
+  cout << " i: " << i << " a: " << a << " b: " << b << " c: " << c << endl; // 33 0 -10 8
   other(); // 107 8 6 15
   
   return 0;
