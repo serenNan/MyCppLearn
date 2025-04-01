@@ -1,22 +1,22 @@
 #include <iostream>
 #include <mutex>
+#include <thread>
 using namespace std;
 
-#if 0
+#if 1
 once_flag g_flag;
-// ±àĞ´Ò»¸öµ¥ÀıÄ£Ê½µÄÀà --> ÀÁººÄ£Ê½
+// ç¼–å†™ä¸€ä¸ªå•ä¾‹æ¨¡å¼çš„ç±» --> æ‡’æ±‰æ¨¡å¼
 class Base
 {
-public:
-    Base(const Base& obj) = delete;
-    Base& operator=(const Base& obj) = delete;
-    static Base* getInstance()
+  public:
+    Base(const Base &obj) = delete;
+    Base &operator=(const Base &obj) = delete;
+    static Base *getInstance()
     {
-        call_once(g_flag, [&]()
-            {
-                obj = new Base;
-                cout << "ÊµÀı¶ÔÏó±»´´½¨..." << endl;
-            });
+        call_once(g_flag, [&]() {
+            obj = new Base;
+            cout << "å®ä¾‹å¯¹è±¡è¢«åˆ›å»º..." << endl;
+        });
         return obj;
     }
 
@@ -29,12 +29,13 @@ public:
     {
         return name;
     }
-private:
-    Base() {};
-    static Base* obj;
+
+  private:
+    Base(){};
+    static Base *obj;
     string name;
 };
-Base* Base::obj = nullptr;
+Base *Base::obj = nullptr;
 
 void myFunc(string name)
 {
@@ -44,10 +45,10 @@ void myFunc(string name)
 
 int main()
 {
-    thread t1(myFunc, "Â··É");
-    thread t2(myFunc, "°¬Ë¹");
-    thread t3(myFunc, "Èø²©");
-    thread t4(myFunc, "äöÎĞÃùÈË");
+    thread t1(myFunc, "è·¯é£");
+    thread t2(myFunc, "è‰¾æ–¯");
+    thread t3(myFunc, "è¨åš");
+    thread t4(myFunc, "æ¼©æ¶¡é¸£äºº");
     t1.join();
     t2.join();
     t3.join();

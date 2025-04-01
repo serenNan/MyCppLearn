@@ -3,7 +3,7 @@
 #include <mutex>
 using namespace std;
 
-#if 0
+#if 1
 struct Person
 {
     int age;
@@ -21,7 +21,7 @@ void do_once(int a, string b)
 void do_something(int age, string name)
 {
     static int num = 1;
-    call_once(g_flag, do_once, 19, "luffy");
+    call_once(g_flag, do_once, age, name);
     cout << "do_something() function num = " << num++ << endl;
 }
 
