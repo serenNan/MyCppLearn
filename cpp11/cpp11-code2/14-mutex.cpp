@@ -5,7 +5,7 @@
 using namespace std;
 using namespace chrono;
 
-#if 0
+#if 1
 class Calculate
 {
 public:
@@ -37,10 +37,11 @@ public:
     {
         for (int i = 0; i < count; ++i)
         {
-            mx.lock();
+            // mx.lock();
+            lock_guard<mutex> lock(mx);
             ++number;
             cout << "++current number: " << number << endl;
-            mx.unlock();
+            // mx.unlock();
             this_thread::sleep_for(chrono::milliseconds(500));
         }
     }
@@ -49,15 +50,14 @@ public:
     {
         for (int i = 0; i < count; ++i)
         {
-            //mx.lock();
             {
-                lock_guard<mutex> guard(mx);
-                increment(2);
+                mx.lock();
                 --number;
                 cout << "--current number: " << number << endl;
+                mx.unlock();
+                this_thread::yield();
             }
-            //mx.unlock();
-            this_thread::yield();
+            
         }
     }
 
@@ -81,7 +81,7 @@ public:
         }
     }
 private:
-    int number = 999;
+    int number = 0;
     int count = 0;
     mutex mx;
     timed_mutex tmx;
@@ -90,8 +90,8 @@ private:
 int main()
 {
     Base b;
-    thread t1(&Base::work, &b);
-    thread t2(&Base::work, &b);
+    thread t1(&Base::increment, &b,10);
+    thread t2(&Base::decrement, &b,10);
     t1.join();
     t2.join();
 
