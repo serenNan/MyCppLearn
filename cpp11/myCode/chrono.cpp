@@ -112,11 +112,11 @@ void durationCastTest()
 {
     // [时钟周期] 源周期可以被目标周期整除
     // 分钟 -> 小时
-    hours h = duration_cast<hours>(minutes(60));
+    hours h = duration_cast<hours>(minutes(69)); // 需要显示转换
     cout << h.count() << endl;
 
     // 小时 -> 分钟
-    minutes m = hours(1);
+    minutes m = hours(1); // 隐式转换
     cout << m.count() << endl; // 60
 
     // [时钟周期数量的类型] 整形和浮点型时长转换
@@ -132,13 +132,13 @@ void durationCastTest()
     duration<int, ratio<1, 100>> d1(100);
     duration<double, ratio<1, 1000>> d2(20.55);
 
-    // duration<int, ratio<1, 100>> d3 = d2;   // error
+    duration<int, ratio<1, 100>> d3 = duration_cast<duration<int,ratio<1,100>>>(d2); 
     duration<double, ratio<1, 1>> d4 = d1;
 }
 
 // 6. time_point_cast 使用
 using Clock = chrono::system_clock;
-template <typename Duration> using TimePoint = time_point<Clock, Duration>;
+template <typename Duration>using TimePoint = time_point<Clock, Duration>;
 
 void timePointCaseTest()
 {
@@ -156,7 +156,7 @@ void timePointCaseTest()
 
 int main()
 {
-    systemClockTest();
+    durationCastTest();
     return 0;
 }
 #endif
