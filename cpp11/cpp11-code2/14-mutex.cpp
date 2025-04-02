@@ -1,14 +1,15 @@
-#include <iostream>
 #include <chrono>
-#include <thread>
+#include <iostream>
 #include <mutex>
+#include <thread>
+
 using namespace std;
 using namespace chrono;
 
 #if 1
 class Calculate
 {
-public:
+  public:
     int mul(int x)
     {
         m_i *= x;
@@ -21,27 +22,24 @@ public:
         return m_i;
     }
 
-    void both(int x, int y)
-    {
-    }
+    void both(int x, int y) {}
 
-private:
+  private:
     int m_i;
 };
 
-// »¥³âËø
+// äº’æ–¥é”
 class Base
 {
-public:
+  public:
     void increment(int count)
     {
         for (int i = 0; i < count; ++i)
         {
-            // mx.lock();
-            lock_guard<mutex> lock(mx);
+            mx.lock();
             ++number;
             cout << "++current number: " << number << endl;
-            // mx.unlock();
+            mx.unlock();
             this_thread::sleep_for(chrono::milliseconds(500));
         }
     }
@@ -51,13 +49,12 @@ public:
         for (int i = 0; i < count; ++i)
         {
             {
-                mx.lock();
+                lock_guard<recursive_mutex> guard(mx);
+                increment(2);
                 --number;
                 cout << "--current number: " << number << endl;
-                mx.unlock();
-                this_thread::yield();
             }
-            
+            this_thread::yield();
         }
     }
 
@@ -65,35 +62,40 @@ public:
     {
         while (true)
         {
-            if (tmx.try_lock_for(chrono::milliseconds(100)))
+            if (tmx.try_lock_for(chrono::milliseconds(50)))
             {
                 count++;
-                this_thread::sleep_for(chrono::milliseconds(500));
-                cout << "ok = ÇÀµ½ÁË»¥³âËøËùÓĞÈ¨, Ïß³ÌID: " << this_thread::get_id() << endl;
+                this_thread::sleep_for(chrono::milliseconds(400));
+                cout << "ok = æŠ¢åˆ°äº†äº’æ–¥é”æ‰€æœ‰æƒ, çº¿ç¨‹ID: " << this_thread::get_id() << endl;
                 tmx.unlock();
                 break;
             }
             else
             {
-                cout << "notok = Ã»ÓĞÇÀµ½»¥³âËøËùÓĞÈ¨, Ïß³ÌID: " << this_thread::get_id() << endl;
+                cout << "notok = æ²¡æœ‰æŠ¢åˆ°äº’æ–¥é”æ‰€æœ‰æƒ, çº¿ç¨‹ID: " << this_thread::get_id() << endl;
                 this_thread::sleep_for(chrono::milliseconds(50));
             }
         }
     }
-private:
+
+  private:
     int number = 0;
     int count = 0;
-    mutex mx;
+    recursive_mutex mx;
     timed_mutex tmx;
 };
 
 int main()
 {
     Base b;
-    thread t1(&Base::increment, &b,10);
-    thread t2(&Base::decrement, &b,10);
+    thread t1(&Base::work, &b);
+    thread t2(&Base::work, &b);
+
+
     t1.join();
     t2.join();
+
+
 
     return 0;
 }

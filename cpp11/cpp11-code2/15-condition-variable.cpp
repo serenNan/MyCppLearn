@@ -1,43 +1,44 @@
+#include <condition_variable>
 #include <iostream>
+#include <mutex>
 #include <queue>
 #include <thread>
-#include <condition_variable>
-#include <mutex>
-using namespace std;
-#if 0
 
-#if 0
-// ÈÎÎñ¶ÓÁĞÀà
+using namespace std;
+#if 1
+
+#if 1
+// ä»»åŠ¡é˜Ÿåˆ—ç±»
 class TaskQueue
 {
-public:
-    // Ìí¼ÓÊı¾İ
-    void put(const int& task)
+  public:
+    // æ·»åŠ æ•°æ®
+    void put(const int &task)
     {
         unique_lock<mutex> locker(myMutex);
-        while (taskQueue.size() == maxSize)
+        while (maxSize == taskQueue.size())
         {
             notFull.wait(locker);
         }
         taskQueue.push(task);
-        cout << "Ìí¼ÓÈÎÎñ: " << task << ", Ïß³ÌID: " << this_thread::get_id() << endl;
-        // »½ĞÑÏû·ÑÕß
+        cout << "æ·»åŠ ä»»åŠ¡: " << task << ", çº¿ç¨‹ID: " << this_thread::get_id() << endl;
+        // å”¤é†’æ¶ˆè´¹è€…
         notEmpty.notify_one();
     }
 
-    // È¡Êı¾İ
+    // å–æ•°æ®
     void take()
     {
         unique_lock<mutex> locker(myMutex);
-        while (taskQueue.empty())
+        while (taskQueue.size() == 0)
         {
             notEmpty.wait(locker);
         }
 
         int node = taskQueue.front();
         taskQueue.pop();
-        cout << "É¾³ıÈÎÎñ: " << node << ", Ïß³ÌID: " << this_thread::get_id() << endl;
-        // »½ĞÑÉú²úÕß
+        cout << "åˆ é™¤ä»»åŠ¡: " << node << ", çº¿ç¨‹ID: " << this_thread::get_id() << endl;
+        // å”¤é†’ç”Ÿäº§è€…
         notFull.notify_all();
     }
 
@@ -66,20 +67,21 @@ public:
         lock_guard<mutex> locker(myMutex);
         return taskQueue.size();
     }
-private:
+
+  private:
     int maxSize = 100;
     queue<int> taskQueue;
     mutex myMutex;
-    condition_variable notFull;     // Éú²úÕß
-    condition_variable notEmpty;    // Ïû·ÑÕß
+    condition_variable notFull;  // ç”Ÿäº§è€…
+    condition_variable notEmpty; // æ¶ˆè´¹è€…
 };
 #else
-// ÈÎÎñ¶ÓÁĞÀà
+// ä»»åŠ¡é˜Ÿåˆ—ç±»
 class TaskQueue
 {
-public:
-    // Ìí¼ÓÊı¾İ
-    void put(const int& task)
+  public:
+    // æ·»åŠ æ•°æ®
+    void put(const int &task)
     {
         lock_guard<mutex> locker(myMutex);
         while (taskQueue.size() == maxSize)
@@ -87,24 +89,22 @@ public:
             notFull.wait(myMutex);
         }
         taskQueue.push(task);
-        cout << "Ìí¼ÓÈÎÎñ: " << task << ", Ïß³ÌID: " << this_thread::get_id() << endl;
-        // »½ĞÑÏû·ÑÕß
+        cout << "æ·»åŠ ä»»åŠ¡: " << task << ", çº¿ç¨‹ID: " << this_thread::get_id() << endl;
+        // å”¤é†’æ¶ˆè´¹è€…
         notEmpty.notify_one();
     }
 
-    // È¡Êı¾İ
+    // å–æ•°æ®
     void take()
     {
         myMutex.lock();
-        notEmpty.wait(myMutex, [=]() {
-            return !taskQueue.empty();
-            });
+        notEmpty.wait(myMutex, [=]() { return !taskQueue.empty(); });
 
         int node = taskQueue.front();
         taskQueue.pop();
-        cout << "É¾³ıÈÎÎñ: " << node << ", Ïß³ÌID: " << this_thread::get_id() << endl;
+        cout << "åˆ é™¤ä»»åŠ¡: " << node << ", çº¿ç¨‹ID: " << this_thread::get_id() << endl;
         myMutex.unlock();
-        // »½ĞÑÉú²úÕß
+        // å”¤é†’ç”Ÿäº§è€…
         notFull.notify_all();
     }
 
@@ -133,23 +133,24 @@ public:
         lock_guard<mutex> locker(myMutex);
         return taskQueue.size();
     }
-private:
+
+  private:
     int maxSize = 100;
     queue<int> taskQueue;
     mutex myMutex;
-    condition_variable_any notFull;     // Éú²úÕß
-    condition_variable_any notEmpty;    // Ïû·ÑÕß
+    condition_variable_any notFull;  // ç”Ÿäº§è€…
+    condition_variable_any notEmpty; // æ¶ˆè´¹è€…
 };
 #endif
 
-int main12345678()
+int main()
 {
     thread t1[5];
     thread t2[5];
     TaskQueue taskQ;
     for (int i = 0; i < 5; ++i)
     {
-        t1[i] = thread(&TaskQueue::put, &taskQ, 100+i);
+        t1[i] = thread(&TaskQueue::put, &taskQ, 100 + i);
         t2[i] = thread(&TaskQueue::take, &taskQ);
     }
 
