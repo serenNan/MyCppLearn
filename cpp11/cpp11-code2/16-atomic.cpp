@@ -4,7 +4,7 @@
 #include <mutex>
 using namespace std;
 
-#if 0
+#if 1
 struct Base
 {
     Base(int n, string s) :age(n), name(s) {}

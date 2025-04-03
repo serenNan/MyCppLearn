@@ -12,10 +12,9 @@ class TaskQueue
     // 添加数据
     void put(int task)
     {
-        unique_lock<mutex> locker(myMutex);
-        while (maxSize == taskQueue.size())
+        while (taskQueue.size() == maxSize)
         {
-            full.wait(locker);
+            full.wait(myMutex);
         }
         taskQueue.push(task);
         cout << "添加任务：" << task << "，线程ID：" << this_thread::get_id() << endl;
@@ -26,14 +25,13 @@ class TaskQueue
     // 取数据
     void take()
     {
-        unique_lock<mutex> locker(myMutex);
-        while (taskQueue.size() == 0)
-        {
-            empty.wait(locker);
-        }
+        myMutex.lock();
+        empty.wait(myMutex, [=]() { return !taskQueue.empty(); });
+
         int node = taskQueue.front();
         taskQueue.pop();
         cout << "删除任务：" << node << "，线程ID：" << this_thread::get_id() << endl;
+        myMutex.unlock();
         // 唤醒消费者
         empty.notify_one();
     }
@@ -70,8 +68,8 @@ class TaskQueue
     int maxSize = 100;
     queue<int> taskQueue;
     mutex myMutex;
-    condition_variable full;  // 管理生产者
-    condition_variable empty; // 管理消费者
+    condition_variable_any full;  // 管理生产者
+    condition_variable_any empty; // 管理消费者
 };
 
 int main()
@@ -81,8 +79,8 @@ int main()
     TaskQueue taskQ;
     for (int i = 0; i < 5; i++)
     {
-        t1[i] = thread(&TaskQueue::put,&taskQ,100+i);
-        t2[i] = thread(&TaskQueue::take,&taskQ);
+        t1[i] = thread(&TaskQueue::put, &taskQ, 100 + i);
+        t2[i] = thread(&TaskQueue::take, &taskQ);
     }
     for (int i = 0; i < 5; i++)
     {
