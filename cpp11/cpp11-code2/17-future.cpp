@@ -1,9 +1,10 @@
+#include <future>
 #include <iostream>
 #include <thread>
-#include <future>
+
 using namespace std;
 
-void func(promise<string>& p)
+void func(promise<string> &p)
 {
     this_thread::sleep_for(chrono::seconds(3));
     p.set_value("我是路飞，要成为海贼王。。。");
@@ -16,10 +17,10 @@ string myFunc()
     return "我是路飞，要成为海贼王。。。";
 }
 
-using funcPtr = string(*)(string, int);
+using funcPtr = string (*)(string, int);
 class Base
 {
-public:
+  public:
     string operator()(string msg)
     {
         string str = "operator() function msg: " + msg;
@@ -47,31 +48,34 @@ public:
 int main()
 {
     cout << "主线程线程ID: " << this_thread::get_id() << endl;
-    future<string> f = async(launch::deferred, [](int number) {
-        cout << "子线程线程ID: " << this_thread::get_id() << endl;
-        return string("我是海贼王...") + to_string(number);
-        }, 100);
+    future<string> f = async(
+        launch::deferred,
+        [](int number) {
+            cout << "子线程线程ID: " << this_thread::get_id() << endl;
+            return string("我是海贼王...") + to_string(number);
+        },
+        100);
 
     this_thread::sleep_for(chrono::seconds(10));
     cout << "子线程的返回值: " << f.get() << endl;
 
-    //future_status status;
-    //do 
+    // future_status status;
+    // do
     //{
-    //    status = f.wait_for(chrono::seconds(1));
-    //    if (status == future_status::deferred)
-    //    {
-    //        cout << "子线程还没有执行..." << endl;
-    //        f.wait();
-    //    }
-    //    else if (status == future_status::ready)
-    //    {
-    //        cout << "数据就绪了, 子线程返回的数据是: " << f.get() << endl;
-    //    }
-    //    else if (status == future_status::timeout)
-    //    {
-    //        cout << "子线程还在执行, 超时时长用完了, 继续等待..." << endl;
-    //    }
+    //     status = f.wait_for(chrono::seconds(1));
+    //     if (status == future_status::deferred)
+    //     {
+    //         cout << "子线程还没有执行..." << endl;
+    //         f.wait();
+    //     }
+    //     else if (status == future_status::ready)
+    //     {
+    //         cout << "数据就绪了, 子线程返回的数据是: " << f.get() << endl;
+    //     }
+    //     else if (status == future_status::timeout)
+    //     {
+    //         cout << "子线程还在执行, 超时时长用完了, 继续等待..." << endl;
+    //     }
 
     //} while (status != future_status::ready);
 #if 0
@@ -117,4 +121,3 @@ int main()
 #endif
     return 0;
 }
-

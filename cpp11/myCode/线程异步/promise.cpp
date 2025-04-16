@@ -1,27 +1,24 @@
 #include <future>
 #include <iostream>
 #include <thread>
-using namespace std;
 
-void func(promise<string> &p)
-{
-    this_thread::sleep_for(chrono::seconds(3));
-    p.set_value("子线程的字符串");
-    this_thread::sleep_for(chrono::seconds(1));
-}
+using namespace std;
 
 int main()
 {
-    promise<string> pro;
-    //thread t1(func, ref(pro));
-    thread t2([](promise<string> &p) {
-        this_thread::sleep_for(chrono::seconds(3));
-        p.set_value("子线程的字符串");
-        this_thread::sleep_for(chrono::seconds(1));
-    },ref(pro));
-    future<string> f = pro.get_future();
-    string str = f.get();
-    cout << "子线程返回的数据:" << str << endl;
-    t2.join();
+    promise<int> pr;
+    thread t1(
+        [](promise<int> &p) {
+            p.set_value_at_thread_exit(100);
+            this_thread::sleep_for(chrono::seconds(3));
+            cout << "睡醒了...." << endl;
+        },
+        ref(pr));
+
+    future<int> f = pr.get_future();
+    int value = f.get();
+    cout << "value: " << value << endl;
+
+    t1.join();
     return 0;
 }
